@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>My Complaints - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='student-home.html'" title="Back to Home">←</button>
+      <span>My Reported Issues</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div id="userContextBar" style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:12px; background:var(--primary-light); padding:8px 12px; border-radius:12px; border:1px solid rgba(5, 150, 105, 0.2); display:flex; align-items:center; gap:6px;">
+        <span>👤 Logged-in Account:</span> <span id="userAccountName" style="color:var(--primary-dark); font-weight:800;">Student</span>
+      </div>
+
+      <!-- Search Box -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search my tickets by title, location, category..." oninput="filterMyTickets()">
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="filter-row" id="categoryFilterRow">
+        <div class="filter-chip active" data-cat="">All Categories</div>
+        <div class="filter-chip" data-cat="Electrical">💡 Electrical</div>
+        <div class="filter-chip" data-cat="Plumbing">🚰 Plumbing</div>
+        <div class="filter-chip" data-cat="Pipelines">🌊 Pipelines</div>
+        <div class="filter-chip" data-cat="Steel">⚙️ Steel Materials</div>
+        <div class="filter-chip" data-cat="Gardens">🌻 Gardens</div>
+        <div class="filter-chip" data-cat="Trees">🌳 Trees</div>
+        <div class="filter-chip" data-cat="Furniture">🪑 Furniture</div>
+        <div class="filter-chip" data-cat="Sanitation">🚽 Sanitation</div>
+        <div class="filter-chip" data-cat="Internet">📶 Internet</div>
+      </div>
+
+      <div id="listContainer">
+        <script>document.write(renderSkeletons(4));</script>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="student-home.html"><span class="nav-icon">🏠</span>Home</a>
+      <a href="report-complaint.html" class="fab" style="text-decoration:none;" title="Report Issue">➕</a>
+      <a href="profile.html"><span class="nav-icon">👤</span>Profile</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireStudent();
+    const currentUser = Auth.getUser();
+    if (currentUser) {
+      document.getElementById('userAccountName').textContent = `${currentUser.full_name} (${currentUser.email})`;
+    }
+
+    const categoryIcons = {
+      'Electrical': '💡', 'Plumbing': '🚰', 'Pipelines': '🌊', 'Pipelines & Drainage': '🌊',
+      'Steel Materials': '⚙️', 'Steel Materials & Metal': '⚙️', 'Gardens': '🌻', 'Gardens & Landscaping': '🌻',
+      'Trees': '🌳', 'Trees & Vegetation': '🌳', 'Furniture': '🪑', 'Furniture / Civil': '🪑',
+      'Sanitation': '🚽', 'Sanitation & Hygiene': '🚽', 'Internet / Network': '📶',
+      'Internet & Wi-Fi': '📶', 'Other': '📌'
+    };
+
+    let allComplaintsCache = [];
+    let selectedCat = '';
+
+    async function loadComplaints() {
+      const container = document.getElementById('listContainer');
+      container.innerHTML = renderSkeletons(4);
+      try {
+        allComplaintsCache = await Api.getMyComplaints() || [];
+        renderFilteredComplaints();
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+
+    function renderFilteredComplaints() {
+      const container = document.getElementById('listContainer');
+      const searchQuery = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      const filtered = allComplaintsCache.filter(c => {
+        const matchesCat = !selectedCat || (c.category && c.category.toLowerCase().includes(selectedCat.toLowerCase()));
+        const matchesSearch = !searchQuery || 
+          (c.title && c.title.toLowerCase().includes(searchQuery)) ||
+          (c.location && c.location.toLowerCase().includes(searchQuery)) ||
+          (c.category && c.category.toLowerCase().includes(searchQuery)) ||
+          (c.description && c.description.toLowerCase().includes(searchQuery));
+        return matchesCat && matchesSearch;
+      });
+
+      if (!filtered || filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+          <div style="font-weight:700; color:var(--navy); font-size:16px;">${allComplaintsCache.length === 0 ? 'No Issues Reported Yet' : 'No Matching Tickets Found'}</div>
+          <p style="color:var(--text-muted); font-size:13px; margin: 8px 0 20px;">${allComplaintsCache.length === 0 ? "You haven't submitted any campus maintenance tickets yet." : "Try adjusting your search or category filter."}</p>
+          ${allComplaintsCache.length === 0 ? '<a href="report-complaint.html" class="btn btn-primary" style="display:inline-flex; width:auto; padding:12px 24px;">Report New Issue</a>' : ''}
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => `
+        <a href="complaint-details.html?id=${c.id}" class="complaint-item">
+          ${c.photo_url
+            ? `<img src="${c.photo_url}" class="complaint-thumb" alt="Proof Photo">`
+            : `<div class="complaint-thumb" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--primary-light);color:var(--primary);">${categoryIcons[c.category] || '📌'}</div>`}
+          <div class="complaint-info">
+            <div class="name">${c.title || c.category}</div>
+            <div class="meta">📍 ${c.location || 'Campus Location'}</div>
+            <div class="meta">🕒 ${formatDate(c.created_at)}</div>
+          </div>
+          <span class="badge" data-status="${c.status}">${c.status}</span>
+        </a>
+      `).join('');
+    }
+
+    function filterMyTickets() {
+      renderFilteredComplaints();
+    }
+
+    document.getElementById('categoryFilterRow').addEventListener('click', (e) => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#categoryFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedCat = chip.dataset.cat;
+      renderFilteredComplaints();
+    });
+
+    loadComplaints();
+  </script>
+</body>
+</html>

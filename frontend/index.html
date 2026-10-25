@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/png" href="icons/logo.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0B192C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body style="background: #0B192C;">
+  <div class="phone-screen" style="background: linear-gradient(180deg, #0B192C 0%, #047857 100%); color: #fff;">
+    <!-- Ambient Glow Orbs -->
+    <div class="bg-glow-orb bg-glow-orb-1" style="opacity: 0.6;"></div>
+    <div class="bg-glow-orb bg-glow-orb-2" style="opacity: 0.6;"></div>
+
+    <div class="center-content">
+      <div class="spanner-hero-wrapper animate-pop-in">
+        <div class="logo-orbit-ring logo-orbit-ring-1">
+          <div class="orbit-dot orbit-dot-1"></div>
+          <div class="orbit-dot orbit-dot-2"></div>
+        </div>
+        <div class="logo-orbit-ring logo-orbit-ring-2">
+          <div class="orbit-dot orbit-dot-1"></div>
+          <div class="orbit-dot orbit-dot-2"></div>
+        </div>
+        <div class="logo-shine-sweep"></div>
+        <div class="spanner-sparks-container">
+          <span class="spanner-spark spanner-spark-1">✨</span>
+          <span class="spanner-spark spanner-spark-2">⚡</span>
+          <span class="spanner-spark spanner-spark-3">💥</span>
+        </div>
+        <img src="icons/logo.png" alt="FixMyCampus Logo" class="spanner-fix-img">
+      </div>
+      <h1 class="brand animate-fade-up delay-1" style="color: #fff; font-size: 32px;">Fix<span style="color: #10B981;">MyCampus</span></h1>
+      <div class="slogan-pill animate-fade-up delay-2" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3); margin-top: 10px;">REPORT • TRACK • RESOLVE</div>
+      <p class="animate-fade-up delay-3" style="color: rgba(255,255,255,0.85); font-size: 13.5px; font-weight: 600; margin-top: 8px;">Better Campus, Better Tomorrow</p>
+      
+      <div class="loading-spinner mt-24 animate-fade-up delay-4" style="border-color: rgba(255,255,255,0.2); border-top-color: #10B981;"></div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+
+  <script src="js/api.js"></script>
+  <script>
+    setTimeout(() => {
+      if (Auth.isLoggedIn()) {
+        window.location.href = Auth.isAdmin() ? 'admin-dashboard.html' : 'student-home.html';
+      } else {
+        window.location.href = 'welcome.html';
+      }
+    }, 1200);
+  </script>
+</body>
+</html>
+

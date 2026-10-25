@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Admin Dashboard - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <span>Admin Dashboard</span>
+      <div class="spacer"></div>
+      <button class="topbar-btn" onclick="Auth.logout('admin-login.html')" title="Logout" style="font-size:16px;">🚪</button>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+    
+    <div class="content" id="dashboardContainer">
+      <script>document.write(renderSkeletons(4));</script>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="admin-dashboard.html" class="active"><span class="nav-icon">📊</span>Dashboard</a>
+      <a href="all-complaints.html"><span class="nav-icon">📋</span>Tickets</a>
+      <a href="admin-users.html"><span class="nav-icon">👥</span>Users</a>
+      <a href="admin-categories.html"><span class="nav-icon">🏷️</span>Categories</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAdmin();
+
+    const categoryIcons = {
+      'Electrical': '💡', 'Plumbing': '🚰', 'Pipelines': '🌊', 'Pipelines & Drainage': '🌊',
+      'Steel Materials': '⚙️', 'Steel Materials & Metal': '⚙️', 'Gardens': '🌻', 'Gardens & Landscaping': '🌻',
+      'Trees': '🌳', 'Trees & Vegetation': '🌳', 'Furniture': '🪑', 'Furniture / Civil': '🪑',
+      'Sanitation': '🚽', 'Sanitation & Hygiene': '🚽', 'Internet / Network': '📶',
+      'Internet & Wi-Fi': '📶', 'Other': '📌'
+    };
+
+    async function loadDashboard() {
+      const container = document.getElementById('dashboardContainer');
+      container.innerHTML = renderSkeletons(4);
+      try {
+        const stats = await Api.getAdminStats();
+        container.innerHTML = `
+          <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h2 style="font-family:'Outfit',sans-serif; color:var(--navy); font-size:22px; margin-bottom:4px;">Campus Overview</h2>
+              <div class="slogan-pill" style="font-size:10px;">INFRASTRUCTURE RESOLUTION HUB</div>
+            </div>
+            <button onclick="loadDashboard()" class="btn btn-outline" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">🔄 Refresh</button>
+          </div>
+
+          <div class="stat-grid animate-fade-up">
+            <div class="stat-card admin-card-hover" onclick="location.href='all-complaints.html'" style="cursor:pointer;">
+              <div class="icon-circle">📋</div>
+              <div><div class="num">${stats.totalComplaints}</div><div class="label">Total Issues</div></div>
+            </div>
+            <div class="stat-card admin-card-hover" onclick="location.href='all-complaints.html?status=Pending'" style="cursor:pointer;">
+              <div class="icon-circle" style="background:var(--pending-bg);color:var(--pending-text);">⏳</div>
+              <div><div class="num">${stats.pending}</div><div class="label">Pending</div></div>
+            </div>
+            <div class="stat-card admin-card-hover" onclick="location.href='all-complaints.html?status=In Progress'" style="cursor:pointer;">
+              <div class="icon-circle" style="background:var(--progress-bg);color:var(--progress-text);">🕓</div>
+              <div><div class="num">${stats.inProgress}</div><div class="label">In Progress</div></div>
+            </div>
+            <div class="stat-card admin-card-hover" onclick="location.href='all-complaints.html?status=Completed'" style="cursor:pointer;">
+              <div class="icon-circle" style="background:var(--completed-bg);color:var(--completed-text);">✅</div>
+              <div><div class="num">${stats.completed}</div><div class="label">Completed</div></div>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Cards -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;" class="animate-fade-up">
+            <a href="admin-users.html" class="action-card" style="padding:12px; margin:0; text-decoration:none;">
+              <div class="icon-circle" style="width:36px; height:36px; font-size:16px;">👥</div>
+              <div>
+                <div class="title" style="font-size:13.5px;">User Directory</div>
+                <div class="desc" style="font-size:11px;">${stats.studentCount || 0} Students</div>
+              </div>
+            </a>
+            <a href="admin-categories.html" class="action-card" style="padding:12px; margin:0; text-decoration:none;">
+              <div class="icon-circle" style="width:36px; height:36px; font-size:16px;">🏷️</div>
+              <div>
+                <div class="title" style="font-size:13.5px;">Categories</div>
+                <div class="desc" style="font-size:11px;">Manage Tiers</div>
+              </div>
+            </a>
+          </div>
+
+          ${stats.categoryBreakdown && stats.categoryBreakdown.length > 0 ? `
+            <div style="margin:16px 0 10px;">
+              <h4 style="font-family:'Outfit',sans-serif; font-size:14px; color:var(--navy); margin-bottom:8px;">📊 Issues by Category:</h4>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${stats.categoryBreakdown.map(b => `
+                  <div style="background:var(--card); border:1px solid var(--border); padding:4px 10px; border-radius:12px; font-size:11.5px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:5px;">
+                    <span>${categoryIcons[b.category] || '📌'}</span>
+                    <span>${b.category}</span>
+                    <span style="background:var(--primary-light); color:var(--primary-dark); padding:1px 6px; border-radius:8px; font-size:10.5px;">${b.count}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="section-heading animate-fade-up" style="margin-top:16px;">
+            <h3 style="font-family:'Outfit',sans-serif; font-weight:700;">Recent Campus Tickets</h3>
+            <a href="all-complaints.html" style="color:var(--primary); font-weight:700; font-size:13px;">View All (${stats.totalComplaints}) →</a>
+          </div>
+
+          ${stats.recentComplaints.length === 0
+            ? `<div class="empty-state">No campus complaints submitted yet.</div>`
+            : stats.recentComplaints.map(c => `
+              <a href="complaint-management.html?id=${c.id}" class="complaint-item animate-row-enter">
+                <div class="complaint-thumb" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--primary-light);color:var(--primary);">${categoryIcons[c.category] || '📌'}</div>
+                <div class="complaint-info">
+                  <div class="name">${c.title || c.category}</div>
+                  <div class="meta">📍 ${c.location || 'Campus Location'} · 👤 ${c.student_name || 'Student'}</div>
+                </div>
+                <span class="badge" data-status="${c.status}">${c.status}</span>
+              </a>
+            `).join('')}
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+    loadDashboard();
+  </script>
+</body>
+</html>

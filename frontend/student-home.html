@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Student Portal - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <span>FixMyCampus</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div style="margin-bottom: 16px;">
+        <p class="greeting" id="greeting" style="font-size:24px; color:var(--navy); margin-bottom: 4px;">Hi, Student 👋</p>
+        <p class="greeting-sub" style="margin-bottom: 8px;">What issue are you facing on campus today?</p>
+        <div class="slogan-pill" style="font-size:10px;">REPORT • TRACK • RESOLVE</div>
+      </div>
+
+      <!-- Live Student Ticket Summary Cards -->
+      <div class="stat-grid mb-16 animate-fade-up" id="studentStatsGrid">
+        <div class="stat-card" onclick="location.href='my-complaints.html'" style="cursor:pointer; padding:12px;">
+          <div class="icon-circle" style="width:36px; height:36px; font-size:16px;">📋</div>
+          <div><div class="num" id="statTotal" style="font-size:18px;">—</div><div class="label" style="font-size:11px;">My Tickets</div></div>
+        </div>
+        <div class="stat-card" onclick="location.href='my-complaints.html'" style="cursor:pointer; padding:12px;">
+          <div class="icon-circle" style="width:36px; height:36px; font-size:16px; background:var(--pending-bg);color:var(--pending-text);">⏳</div>
+          <div><div class="num" id="statPending" style="font-size:18px;">—</div><div class="label" style="font-size:11px;">Pending</div></div>
+        </div>
+        <div class="stat-card" onclick="location.href='my-complaints.html'" style="cursor:pointer; padding:12px;">
+          <div class="icon-circle" style="width:36px; height:36px; font-size:16px; background:var(--progress-bg);color:var(--progress-text);">🕓</div>
+          <div><div class="num" id="statProgress" style="font-size:18px;">—</div><div class="label" style="font-size:11px;">In Progress</div></div>
+        </div>
+        <div class="stat-card" onclick="location.href='my-complaints.html'" style="cursor:pointer; padding:12px;">
+          <div class="icon-circle" style="width:36px; height:36px; font-size:16px; background:var(--completed-bg);color:var(--completed-text);">✅</div>
+          <div><div class="num" id="statCompleted" style="font-size:18px;">—</div><div class="label" style="font-size:11px;">Resolved</div></div>
+        </div>
+      </div>
+
+      <a href="report-complaint.html" class="action-card primary animate-fade-up">
+        <div class="icon-circle">➕</div>
+        <div>
+          <div class="title">Report New Issue</div>
+          <div class="desc">Submit a maintenance or infrastructure ticket with photo proof</div>
+        </div>
+      </a>
+
+      <a href="my-complaints.html" class="action-card animate-fade-up">
+        <div class="icon-circle">📋</div>
+        <div>
+          <div class="title">Track My Complaints</div>
+          <div class="desc">View live status updates & resolution photos from admins</div>
+        </div>
+      </a>
+
+      <a href="profile.html" class="action-card animate-fade-up">
+        <div class="icon-circle">👤</div>
+        <div>
+          <div class="title">My Profile</div>
+          <div class="desc">Manage account settings and department details</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="student-home.html" class="active"><span class="nav-icon">🏠</span>Home</a>
+      <a href="report-complaint.html" class="fab" style="text-decoration:none;" title="Report New Issue">➕</a>
+      <a href="profile.html"><span class="nav-icon">👤</span>Profile</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireStudent();
+    const user = Auth.getUser();
+    if (user && user.full_name) {
+      document.getElementById('greeting').textContent = `Hi, ${user.full_name.split(' ')[0]} 👋`;
+    }
+
+    async function loadStudentStats() {
+      try {
+        const stats = await Api.getMyStats();
+        let total = 0, pending = 0, progress = 0, completed = 0;
+        if (Array.isArray(stats)) {
+          stats.forEach(s => {
+            const count = Number(s.count) || 0;
+            total += count;
+            if (s.status === 'Pending') pending += count;
+            else if (s.status === 'In Progress') progress += count;
+            else if (s.status === 'Completed') completed += count;
+          });
+        }
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statProgress').textContent = progress;
+        document.getElementById('statCompleted').textContent = completed;
+      } catch (err) {
+        // Fallback silently if stats fail
+        document.getElementById('statTotal').textContent = '0';
+        document.getElementById('statPending').textContent = '0';
+        document.getElementById('statProgress').textContent = '0';
+        document.getElementById('statCompleted').textContent = '0';
+      }
+    }
+    loadStudentStats();
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Admin Portal Login - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/logo.png">
+<link rel="shortcut icon" href="icons/logo.png">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="theme-color" content="#0B192C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="content" style="padding-top: 36px;">
+      <div class="brand-header">
+        <img src="icons/logo.png" alt="FixMyCampus Logo" class="brand-logo-img">
+        <h1 class="brand">Admin <span class="accent">Portal</span></h1>
+        <div class="slogan-pill" style="background:#FEF3C7; color:#B45309; border-color:#F59E0B;">🔒 AUTHORIZED PERSONNEL ONLY</div>
+        <p class="sub-slogan">Campus Infrastructure & Issue Resolution Panel</p>
+      </div>
+
+      <div id="alertBox"></div>
+
+      <form id="adminLoginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Admin Email Address</label>
+          <div class="input-wrap">
+            <span class="icon">✉️</span>
+            <input type="email" id="email" placeholder="admin@fixmycampus.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Admin Security Password</label>
+          <div class="input-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-eye" onclick="togglePw('password', this)" title="Toggle Password Visibility">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="loginBtn" style="background: var(--navy-gradient);">Login to Admin Panel</button>
+      </form>
+
+      <p class="helper-text" style="margin-top:24px;">
+        <a href="login.html" style="color: var(--primary);">← Back to Student Login</a>
+        <br><br>
+        <a href="#" onclick="ApiConfig.openSettingsModal(); return false;" style="color: var(--text-muted); font-size: 12px; text-decoration: none;">⚙️ Server & Network Settings</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/validation.js"></script>
+  <script>
+    function togglePw(id, btn) {
+      const el = document.getElementById(id);
+      if (el.type === 'password') {
+        el.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        el.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+
+    emailEl.addEventListener('blur', () => {
+      const val = emailEl.value.trim();
+      if (val && !Validation.isValidEmail(val)) {
+        Validation.showFieldError(emailEl, 'Please enter a valid email address.');
+      } else if (val) {
+        Validation.showFieldSuccess(emailEl);
+      }
+    });
+
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      const btn = document.getElementById('loginBtn');
+      alertBox.innerHTML = '';
+
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+
+      if (!Validation.validateAdminLogin(email, password)) {
+        Toast.warning('Please enter valid admin credentials.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px; display: inline-block;"></span> Verifying Admin Credentials...`;
+
+      try {
+        const { token, user } = await Api.adminLogin({ email, password });
+        Auth.setSession(token, user);
+        Toast.success('Admin authentication successful! Redirecting...');
+        setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 400);
+      } catch (err) {
+        const msg = err.message || 'Invalid admin credentials.';
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${msg}</div>`;
+        Toast.error(msg);
+        btn.disabled = false;
+        btn.textContent = 'Login to Admin Panel';
+      }
+    });
+  </script>
+</body>
+</html>

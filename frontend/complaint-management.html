@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Manage Ticket - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='all-complaints.html'" title="Back to All Tickets">←</button>
+      <span>Ticket Management</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content" id="container">
+      <script>document.write(renderSkeletons(4));</script>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAdmin();
+    const id = new URLSearchParams(window.location.search).get('id');
+    const staffOptions = ['Electrician', 'Plumber', 'Carpenter', 'Cleaning Staff', 'IT Support', 'General Maintenance'];
+
+    async function loadComplaint() {
+      const container = document.getElementById('container');
+      container.innerHTML = renderSkeletons(4);
+      if (!id) { container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> No complaint specified.</div>`; return; }
+
+      try {
+        const c = await Api.getComplaint(id);
+        container.innerHTML = `
+          ${c.photo_url ? `<img src="${c.photo_url}" class="detail-photo" alt="Photo Proof">` : ''}
+
+          <div style="margin-bottom:16px;">
+            <h2 style="font-family:'Outfit',sans-serif; color:var(--navy); font-size:20px;">${c.title || c.category}</h2>
+            <span class="badge" data-status="${c.status}" style="display:inline-block; margin-top:6px;">Current Status: ${c.status}</span>
+          </div>
+
+          <div class="detail-row"><div class="label">Student Name :</div><div class="value">👤 ${c.student_name}</div></div>
+          <div class="detail-row"><div class="label">Department :</div><div class="value">🎓 ${c.department || '—'}</div></div>
+          <div class="detail-row"><div class="label">Category :</div><div class="value">🏷️ ${c.category}</div></div>
+          <div class="detail-row"><div class="label">Description :</div><div class="value" style="line-height:1.5;">${c.description}</div></div>
+          <div class="detail-row"><div class="label">Location :</div><div class="value">📍 ${c.location || '—'}</div></div>
+          <div class="detail-row"><div class="label">Student Photo Proof :</div><div class="value">${c.photo_url ? '📷 Attached' : 'None'}</div></div>
+          
+          ${c.resolution_photo_url ? `
+            <div style="margin:18px 0; padding:14px; background:var(--completed-bg); border-radius:var(--radius); border:1px solid var(--completed-text); position:relative;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:800; color:var(--completed-text); font-size:13.5px;">Current Resolution Proof Photo:</span>
+                <button type="button" onclick="document.getElementById('resPhotoInput').click()" style="background:var(--card); border:1px solid var(--border); padding:4px 10px; border-radius:12px; font-weight:700; font-size:12px; cursor:pointer; color:var(--navy); display:flex; align-items:center; gap:4px;">
+                  ✏️ Edit / Change Photo
+                </button>
+              </div>
+              <img id="currentResImg" src="${c.resolution_photo_url}" style="max-height:200px; width:100%; border-radius:10px; object-fit:cover;" alt="Current Resolution Proof">
+            </div>
+          ` : ''}
+
+          <div id="alertBox"></div>
+
+          <div class="form-group" style="margin-top:20px;">
+            <label for="statusSelect">Update Ticket Status</label>
+            <div class="input-wrap">
+              <span class="icon">🔄</span>
+              <select id="statusSelect">
+                <option ${c.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option ${c.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="staffSelect">Assign Technician / Staff</label>
+            <div class="input-wrap">
+              <span class="icon">🔧</span>
+              <select id="staffSelect">
+                <option value="">Select Staff Member</option>
+                ${staffOptions.map(s => `<option ${c.assigned_staff === s ? 'selected' : ''}>${s}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>${c.resolution_photo_url ? 'Upload / Replace Resolution Photo' : 'Upload Resolution / Problem Solved Photo'} <span style="font-weight:400; color:var(--text-muted);">(Shows proof to student)</span></label>
+            <div class="upload-box" id="resUploadBox" onclick="document.getElementById('resPhotoInput').click()">
+              <div id="resPlaceholder">
+                <div class="camera-icon" style="background:var(--completed-bg); color:var(--completed-text);">📸</div>
+                <div style="font-weight:700; color:var(--navy); font-size:14px;">${c.resolution_photo_url ? 'Tap to select a new resolution photo' : 'Tap to upload solution proof photo'}</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Upload photo of fixed equipment / area</div>
+              </div>
+              <div id="resPreviewContainer" style="display:none; text-align:center;">
+                <img id="resPreviewImg" class="preview" alt="New Resolution Preview" style="max-height:180px; width:100%; border-radius:12px; object-fit:cover; margin-bottom:8px;">
+                <div style="font-size:12px; font-weight:700; color:var(--primary);">✏️ New Photo Selected — Tap button below to save</div>
+              </div>
+            </div>
+            <input type="file" id="resPhotoInput" accept="image/*" style="display:none;">
+          </div>
+
+          <button class="btn btn-primary" id="updateBtn">Update Ticket Status & Save Photo</button>
+        `;
+
+        let compressedResPhoto = null;
+        const resPhotoInput = document.getElementById('resPhotoInput');
+        resPhotoInput.addEventListener('change', async () => {
+          const file = resPhotoInput.files[0];
+          if (!file) return;
+
+          Toast.info('Optimizing resolution proof photo...');
+          try {
+            compressedResPhoto = await ImageCompressor.compress(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              document.getElementById('resPreviewImg').src = e.target.result;
+              document.getElementById('resPreviewContainer').style.display = 'block';
+              document.getElementById('resPlaceholder').style.display = 'none';
+              Toast.info('New resolution photo optimized 📸 — Click save to update');
+            };
+            reader.readAsDataURL(compressedResPhoto);
+          } catch (err) {
+            compressedResPhoto = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              document.getElementById('resPreviewImg').src = e.target.result;
+              document.getElementById('resPreviewContainer').style.display = 'block';
+              document.getElementById('resPlaceholder').style.display = 'none';
+              Toast.info('New resolution photo selected 📸 — Click save to update');
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        document.getElementById('updateBtn').addEventListener('click', async () => {
+          const btn = document.getElementById('updateBtn');
+          const alertBox = document.getElementById('alertBox');
+          btn.disabled = true;
+          btn.innerHTML = `<span class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px; display: inline-block;"></span> Updating Status...`;
+          
+          try {
+            const formData = new FormData();
+            formData.append('status', document.getElementById('statusSelect').value);
+            formData.append('assignedStaff', document.getElementById('staffSelect').value);
+            if (compressedResPhoto) {
+              formData.append('resolutionPhoto', compressedResPhoto);
+            } else if (resPhotoInput.files[0]) {
+              formData.append('resolutionPhoto', resPhotoInput.files[0]);
+            }
+
+            await Api.updateComplaint(id, formData, true);
+            alertBox.innerHTML = `<div class="alert success"><span class="err-icon">✅</span> Ticket status and resolution proof updated successfully!</div>`;
+            Toast.success('Ticket status & resolution proof updated successfully!');
+            setTimeout(() => { loadComplaint(); }, 1200);
+          } catch (err) {
+            alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+            Toast.error(err.message);
+            btn.disabled = false;
+            btn.textContent = 'Update Ticket Status & Upload Proof';
+          }
+        });
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+    loadComplaint();
+  </script>
+</body>
+</html>

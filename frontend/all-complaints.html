@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Campus Complaints - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='admin-dashboard.html'" title="Back to Dashboard">←</button>
+      <span>All Campus Tickets</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <!-- Search Box -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search tickets by title, student, location, category..." oninput="filterAllTickets()">
+      </div>
+
+      <!-- Status Filter Row -->
+      <div class="filter-row" id="statusFilterRow">
+        <div class="filter-chip active" data-status="">All Statuses</div>
+        <div class="filter-chip" data-status="Pending">⏳ Pending</div>
+        <div class="filter-chip" data-status="In Progress">🕓 In Progress</div>
+        <div class="filter-chip" data-status="Completed">✅ Completed</div>
+      </div>
+
+      <!-- Category Filter Row -->
+      <div class="filter-row" id="categoryFilterRow">
+        <div class="filter-chip active" data-cat="">All Categories</div>
+        <div class="filter-chip" data-cat="Electrical">💡 Electrical</div>
+        <div class="filter-chip" data-cat="Plumbing">🚰 Plumbing</div>
+        <div class="filter-chip" data-cat="Pipelines">🌊 Pipelines</div>
+        <div class="filter-chip" data-cat="Steel">⚙️ Steel Materials</div>
+        <div class="filter-chip" data-cat="Gardens">🌻 Gardens</div>
+        <div class="filter-chip" data-cat="Trees">🌳 Trees</div>
+        <div class="filter-chip" data-cat="Furniture">🪑 Furniture</div>
+        <div class="filter-chip" data-cat="Sanitation">🚽 Sanitation</div>
+        <div class="filter-chip" data-cat="Internet">📶 Internet</div>
+      </div>
+
+      <div id="listContainer">
+        <script>document.write(renderSkeletons(4));</script>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="admin-dashboard.html"><span class="nav-icon">📊</span>Dashboard</a>
+      <a href="all-complaints.html" class="active"><span class="nav-icon">📋</span>Tickets</a>
+      <a href="admin-users.html"><span class="nav-icon">👥</span>Users</a>
+      <a href="admin-categories.html"><span class="nav-icon">🏷️</span>Categories</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAdmin();
+
+    const categoryIcons = {
+      'Electrical': '💡', 'Plumbing': '🚰', 'Pipelines': '🌊', 'Pipelines & Drainage': '🌊',
+      'Steel Materials': '⚙️', 'Steel Materials & Metal': '⚙️', 'Gardens': '🌻', 'Gardens & Landscaping': '🌻',
+      'Trees': '🌳', 'Trees & Vegetation': '🌳', 'Furniture': '🪑', 'Furniture / Civil': '🪑',
+      'Sanitation': '🚽', 'Sanitation & Hygiene': '🚽', 'Internet / Network': '📶',
+      'Internet & Wi-Fi': '📶', 'Other': '📌'
+    };
+
+    let allComplaintsCache = [];
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedStatus = urlParams.get('status') || '';
+    let selectedCat = urlParams.get('category') || '';
+
+    if (selectedStatus) {
+      document.querySelectorAll('#statusFilterRow .filter-chip').forEach(c => {
+        if (c.dataset.status === selectedStatus) c.classList.add('active');
+        else c.classList.remove('active');
+      });
+    }
+
+    async function fetchComplaints() {
+      const container = document.getElementById('listContainer');
+      container.innerHTML = renderSkeletons(4);
+      try {
+        allComplaintsCache = await Api.getAllComplaints('') || [];
+        renderFilteredComplaints();
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+
+    function renderFilteredComplaints() {
+      const container = document.getElementById('listContainer');
+      const searchQuery = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      const filtered = allComplaintsCache.filter(c => {
+        const matchesStatus = !selectedStatus || (c.status && c.status.toLowerCase() === selectedStatus.toLowerCase());
+        const matchesCat = !selectedCat || (c.category && c.category.toLowerCase().includes(selectedCat.toLowerCase()));
+        const matchesSearch = !searchQuery || 
+          (c.title && c.title.toLowerCase().includes(searchQuery)) ||
+          (c.student_name && c.student_name.toLowerCase().includes(searchQuery)) ||
+          (c.location && c.location.toLowerCase().includes(searchQuery)) ||
+          (c.category && c.category.toLowerCase().includes(searchQuery)) ||
+          (c.description && c.description.toLowerCase().includes(searchQuery));
+        return matchesStatus && matchesCat && matchesSearch;
+      });
+
+      if (!filtered || filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">No campus complaints found matching your filters.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => `
+        <a href="complaint-management.html?id=${c.id}" class="complaint-item animate-row-enter">
+          ${c.photo_url
+            ? `<img src="${c.photo_url}" class="complaint-thumb" alt="Photo">`
+            : `<div class="complaint-thumb" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--primary-light);color:var(--primary);">${categoryIcons[c.category] || '📌'}</div>`}
+          <div class="complaint-info">
+            <div class="name">${c.title || c.category}</div>
+            <div class="meta">👤 ${c.student_name || 'Student'}</div>
+            <div class="meta">📍 ${c.location || 'Location'} · ${formatDate(c.created_at)}</div>
+          </div>
+          <span class="badge" data-status="${c.status}">${c.status}</span>
+        </a>
+      `).join('');
+    }
+
+    function filterAllTickets() {
+      renderFilteredComplaints();
+    }
+
+    document.getElementById('statusFilterRow').addEventListener('click', (e) => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#statusFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedStatus = chip.dataset.status;
+      renderFilteredComplaints();
+    });
+
+    document.getElementById('categoryFilterRow').addEventListener('click', (e) => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#categoryFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedCat = chip.dataset.cat;
+      renderFilteredComplaints();
+    });
+
+    fetchComplaints();
+  </script>
+</body>
+</html>

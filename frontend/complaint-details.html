@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Complaint Details - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='my-complaints.html'" title="Back to Complaints">←</button>
+      <span>Ticket Details</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content" id="detailContainer">
+      <script>document.write(renderSkeletons(4));</script>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireStudent();
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    async function loadDetail() {
+      const container = document.getElementById('detailContainer');
+      container.innerHTML = renderSkeletons(4);
+      if (!id) { container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> No complaint specified.</div>`; return; }
+
+      try {
+        const c = await Api.getComplaint(id);
+        container.innerHTML = `
+          ${c.photo_url ? `<img src="${c.photo_url}" class="detail-photo" alt="Complaint Photo">` : ''}
+
+          <div style="margin-bottom:16px;">
+            <h2 style="font-family:'Outfit',sans-serif; color:var(--navy); font-size:20px;">${c.title || c.category}</h2>
+            <span class="badge" data-status="${c.status}" style="display:inline-block; margin-top:6px;">${c.status}</span>
+          </div>
+
+          <div class="detail-row">
+            <div class="label">Category :</div>
+            <div class="value">${c.category}</div>
+          </div>
+          <div class="detail-row">
+            <div class="label">Description :</div>
+            <div class="value" style="line-height:1.5;">${c.description}</div>
+          </div>
+          <div class="detail-row">
+            <div class="label">Location :</div>
+            <div class="value">📍 ${c.location || '—'}</div>
+          </div>
+          <div class="detail-row">
+            <div class="label">Date & Time Reported :</div>
+            <div class="value">🕒 ${formatDate(c.created_at)}</div>
+          </div>
+          ${c.assigned_staff ? `<div class="detail-row"><div class="label">Assigned Technician :</div><div class="value">🔧 ${c.assigned_staff}</div></div>` : ''}
+
+          ${c.resolution_photo_url ? `
+            <div style="margin-top:20px; padding:16px; background:var(--completed-bg); border:1px solid var(--completed-text); border-radius:var(--radius);">
+              <div style="font-weight:800; color:var(--completed-text); font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <span>✅</span> Resolution / Problem Solved Proof (Uploaded by Admin):
+              </div>
+              <img src="${c.resolution_photo_url}" class="detail-photo" style="max-height:260px; width:100%; border-radius:12px; object-fit:contain; background:rgba(15,23,42,0.08); margin:0;" alt="Resolution Proof Photo">
+            </div>
+          ` : ''}
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+    loadDetail();
+  </script>
+</body>
+</html>

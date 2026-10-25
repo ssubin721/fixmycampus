@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Student Login - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/logo.png">
+<link rel="shortcut icon" href="icons/logo.png">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="theme-color" content="#0B192C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="content" style="padding-top: 32px;">
+      <div class="brand-header">
+        <img src="icons/logo.png" alt="FixMyCampus Logo" class="brand-logo-img">
+        <h1 class="brand">Fix<span class="accent">MyCampus</span></h1>
+        <div class="slogan-pill">REPORT • TRACK • RESOLVE</div>
+        <p class="sub-slogan">Better Campus, Better Tomorrow</p>
+      </div>
+
+      <div id="alertBox"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Campus Email Address</label>
+          <div class="input-wrap">
+            <span class="icon">✉️</span>
+            <input type="email" id="email" placeholder="student@campus.edu" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-eye" onclick="togglePw('password', this)" title="Toggle Password Visibility">👁️</button>
+          </div>
+        </div>
+
+        <div class="forgot-link">
+          <a href="#" onclick="Toast.info('Please contact your campus admin or IT department to reset your credentials.'); return false;">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="loginBtn">Login to Campus Portal</button>
+      </form>
+
+      <p class="helper-text">Don't have an account? <a href="register.html">Register Here</a></p>
+      <p class="helper-text" style="margin-top: 8px;"><a href="admin-login.html" style="color: var(--navy); font-weight: 700; text-decoration: none;">Admin Login Portal →</a></p>
+      <p class="helper-text" style="margin-top: 14px;"><a href="#" onclick="ApiConfig.openSettingsModal(); return false;" style="color: var(--text-muted); font-size: 12px; text-decoration: none;">⚙️ Server & Network Settings</a></p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/validation.js"></script>
+  <script>
+    function togglePw(id, btn) {
+      const el = document.getElementById(id);
+      if (el.type === 'password') {
+        el.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        el.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    emailInput.addEventListener('blur', () => {
+      const val = emailInput.value.trim();
+      if (val && !Validation.isValidEmail(val)) {
+        Validation.showFieldError(emailInput, 'Please enter a valid email address.');
+      } else if (val) {
+        Validation.showFieldSuccess(emailInput);
+      }
+    });
+
+    passwordInput.addEventListener('input', () => {
+      if (passwordInput.value.length >= 6) {
+        Validation.showFieldSuccess(passwordInput);
+      }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      const btn = document.getElementById('loginBtn');
+      alertBox.innerHTML = '';
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!Validation.validateLogin(email, password)) {
+        Toast.warning('Please complete all required fields.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px; display: inline-block;"></span> Logging in...`;
+
+      try {
+        const { token, user } = await Api.login({ email, password });
+        Auth.setSession(token, user);
+        Toast.success('Login successful! Redirecting...');
+        setTimeout(() => { window.location.href = 'student-home.html'; }, 400);
+      } catch (err) {
+        const errMsg = err.message || 'Login failed. Please check your credentials.';
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${errMsg}</div>`;
+        Toast.error(errMsg);
+        btn.disabled = false;
+        btn.textContent = 'Login to Campus Portal';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>My Profile - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='student-home.html'" title="Back to Home">←</button>
+      <span>My Profile</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div class="avatar-wrap" style="text-align: center; margin-bottom: 20px;">
+        <div style="position: relative; width: 88px; height: 88px; margin: 0 auto; cursor: pointer;" onclick="document.getElementById('avatarInput').click();" title="Click to Upload Profile Photo">
+          <div class="avatar-circle" id="avatarCircle" style="background: var(--hero-gradient); color:#fff; font-size: 38px; width: 88px; height: 88px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.25); border: 3px solid var(--primary); overflow: hidden;">👤</div>
+          <div style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">📷</div>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)">
+        <div class="user-role-badge mt-8" style="font-size: 12px; font-weight: 800; color: var(--primary-dark); background: var(--primary-light); display: inline-block; padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(5,150,105,0.2);">User Profile</div>
+      </div>
+
+      <div id="alertBox"></div>
+
+      <div id="profileView">
+        <div class="profile-card" style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin-bottom:20px; box-shadow:var(--shadow);">
+          <div class="profile-field-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px dashed var(--border);">
+            <span class="field-label">Name :</span>
+            <span class="field-value" id="v_name">—</span>
+          </div>
+          <div class="profile-field-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px dashed var(--border);">
+            <span class="field-label">Campus Email :</span>
+            <span class="field-value" id="v_email">—</span>
+          </div>
+          <div class="profile-field-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px dashed var(--border);">
+            <span class="field-label">Phone Number :</span>
+            <span class="field-value" id="v_phone">—</span>
+          </div>
+          <div class="profile-field-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px dashed var(--border);">
+            <span class="field-label">Department :</span>
+            <span class="field-value" id="v_department">—</span>
+          </div>
+          <div class="profile-field-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;">
+            <span class="field-label">Academic Year :</span>
+            <span class="field-value" id="v_year">—</span>
+          </div>
+        </div>
+
+        <button class="btn btn-outline mt-16" onclick="toggleEdit(true)">Edit Profile Details</button>
+        <button class="btn btn-danger-text mt-16" onclick="doLogout()" style="width:100%; text-align:center; padding:12px;">🚪 Logout from Portal</button>
+      </div>
+
+      <form id="profileEditForm" style="display:none;" novalidate>
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <span class="icon">👤</span>
+            <input type="text" id="e_name" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Phone Number (10 digits)</label>
+          <div class="input-wrap">
+            <span class="icon">📞</span>
+            <input type="tel" id="e_phone" maxlength="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <div class="input-wrap">
+            <span class="icon">🎓</span>
+            <input type="text" id="e_department">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Academic Year</label>
+          <div class="input-wrap">
+            <span class="icon">📅</span>
+            <input type="text" id="e_year">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Profile Changes</button>
+        <button type="button" class="btn btn-outline mt-16" onclick="toggleEdit(false)">Cancel</button>
+      </form>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="student-home.html"><span class="nav-icon">🏠</span>Home</a>
+      <a href="report-complaint.html" class="fab" style="text-decoration:none;" title="Report Issue">➕</a>
+      <a href="profile.html" class="active"><span class="nav-icon">👤</span>Profile</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/validation.js"></script>
+  <script>
+    Auth.requireStudent();
+    let profile = null;
+
+    async function loadProfile() {
+      try {
+        profile = await Api.getProfile();
+        document.getElementById('v_name').textContent = profile.full_name;
+        document.getElementById('v_email').textContent = profile.email;
+        document.getElementById('v_phone').textContent = profile.phone || '—';
+        document.getElementById('v_department').textContent = profile.department || '—';
+        document.getElementById('v_year').textContent = profile.year || '—';
+        document.getElementById('avatarCircle').innerHTML = profile.avatar_url ? `<img src="${profile.avatar_url}" style="width:100%; height:100%; border-radius:50%; object-fit:contain; background:var(--navy-light);">` : '👤';
+      } catch (err) {
+        document.getElementById('alertBox').innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+      }
+    }
+
+    function toggleEdit(show) {
+      document.getElementById('profileView').style.display = show ? 'none' : 'block';
+      document.getElementById('profileEditForm').style.display = show ? 'block' : 'none';
+      if (show && profile) {
+        document.getElementById('e_name').value = profile.full_name;
+        document.getElementById('e_phone').value = profile.phone || '';
+        document.getElementById('e_department').value = profile.department || '';
+        document.getElementById('e_year').value = profile.year || '';
+      }
+    }
+
+    document.getElementById('profileEditForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = '';
+
+      const fullName = document.getElementById('e_name').value.trim();
+      const phone = document.getElementById('e_phone').value.trim();
+
+      if (!Validation.isValidName(fullName)) {
+        Validation.showFieldError('e_name', 'Full name must be at least 2 characters.');
+        return;
+      }
+      if (phone && !Validation.isValidPhone(phone)) {
+        Validation.showFieldError('e_phone', 'Phone number must be 10 digits.');
+        return;
+      }
+
+      try {
+        await Api.updateProfile({
+          fullName,
+          phone,
+          department: document.getElementById('e_department').value.trim(),
+          year: document.getElementById('e_year').value.trim()
+        });
+        await loadProfile();
+        toggleEdit(false);
+        alertBox.innerHTML = `<div class="alert success"><span class="err-icon">✅</span> Profile updated successfully!</div>`;
+        Toast.success('Profile updated successfully!');
+      } catch (err) {
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    });
+
+    async function handleAvatarUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = '';
+      try {
+        Toast.info('Uploading profile photo...');
+        const res = await fetch(`${API_BASE}/api/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${Auth.getToken()}`
+          },
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to upload photo.');
+        Toast.success('Profile photo updated successfully!');
+        await loadProfile();
+      } catch (err) {
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+
+    function doLogout() { 
+      Toast.info('Logging out...');
+      setTimeout(() => Auth.logout('welcome.html'), 300);
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

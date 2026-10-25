@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Category Management - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='admin-dashboard.html'" title="Back to Dashboard">←</button>
+      <span>Category Management</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div style="margin-bottom: 14px; display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+          <h2 style="font-family:'Outfit',sans-serif; color:var(--navy); font-size:22px; margin-bottom:4px;">Issue Categories</h2>
+          <div class="slogan-pill" style="font-size:10px;">CAMPUS INFRASTRUCTURE TIERS</div>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAddForm()" style="width:auto; padding:8px 14px; font-size:12px; margin:0;">
+          ➕ Add Category
+        </button>
+      </div>
+
+      <div id="alertBox"></div>
+
+      <!-- Add Category Collapsible Form -->
+      <div id="addCategoryCard" style="display:none; background:var(--card); border:1px solid var(--primary); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:16px; margin-bottom:10px; color:var(--navy);">New Campus Category</h3>
+        <form id="newCatForm" novalidate>
+          <div class="form-group">
+            <label>Category Name</label>
+            <div class="input-wrap">
+              <span class="icon">🏷️</span>
+              <input type="text" id="catName" placeholder="e.g. Elevators & Lifts" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Icon Emoji</label>
+            <div class="input-wrap">
+              <span class="icon">🎨</span>
+              <input type="text" id="catIcon" placeholder="e.g. 🛗" maxlength="4" value="📌" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Short Description</label>
+            <div class="input-wrap">
+              <span class="icon">📝</span>
+              <input type="text" id="catDesc" placeholder="e.g. Campus lifts, buttons, and escalator issues">
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Save Category</button>
+            <button type="button" class="btn btn-outline" onclick="toggleAddForm(false)" style="flex:1;">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Categories Container -->
+      <div id="categoryListContainer">
+        <script>document.write(renderSkeletons(4));</script>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="admin-dashboard.html"><span class="nav-icon">📊</span>Dashboard</a>
+      <a href="all-complaints.html"><span class="nav-icon">📋</span>Tickets</a>
+      <a href="admin-users.html"><span class="nav-icon">👥</span>Users</a>
+      <a href="admin-categories.html" class="active"><span class="nav-icon">🏷️</span>Categories</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAdmin();
+
+    async function loadCategories() {
+      const container = document.getElementById('categoryListContainer');
+      container.innerHTML = renderSkeletons(4);
+      try {
+        const categories = await Api.getAdminCategories() || [];
+        if (categories.length === 0) {
+          container.innerHTML = `<div class="empty-state">No categories configured yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = categories.map(c => `
+          <div class="category-manage-card">
+            <div class="category-manage-icon">${c.icon || '📌'}</div>
+            <div class="category-manage-info">
+              <div style="font-weight:700; color:var(--navy); font-size:15px;">${c.name}</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${c.description || 'Campus maintenance category'}</div>
+              <span class="category-count-badge">📋 ${c.complaint_count || 0} Tickets Filed</span>
+            </div>
+            <button type="button" class="user-action-btn delete" onclick="deleteCategory(${c.id}, '${c.name}')" style="width:auto; padding:6px 10px;" title="Delete Category">
+              🗑️
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+
+    function toggleAddForm(show) {
+      const card = document.getElementById('addCategoryCard');
+      const isVisible = card.style.display === 'block';
+      const targetState = show !== undefined ? show : !isVisible;
+      card.style.display = targetState ? 'block' : 'none';
+      if (targetState) document.getElementById('catName').focus();
+    }
+
+    document.getElementById('newCatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('catName').value.trim();
+      const icon = document.getElementById('catIcon').value.trim() || '📌';
+      const description = document.getElementById('catDesc').value.trim();
+
+      if (!name) {
+        Toast.warning('Please enter a category name.');
+        return;
+      }
+
+      try {
+        await Api.addCategory({ name, icon, description });
+        Toast.success(`Category "${name}" added successfully!`);
+        document.getElementById('newCatForm').reset();
+        toggleAddForm(false);
+        loadCategories();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    async function deleteCategory(id, name) {
+      if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
+      try {
+        await Api.deleteCategory(id);
+        Toast.success(`Category "${name}" removed.`);
+        loadCategories();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    }
+
+    loadCategories();
+  </script>
+</body>
+</html>

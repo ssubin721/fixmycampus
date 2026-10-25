@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Welcome - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/png" href="icons/logo.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0B192C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <!-- Opening App Entrance Splash Screen Overlay -->
+  <div id="appSplashScreen" class="app-splash-overlay" title="Tap to enter app">
+    <div class="splash-content">
+      <div class="splash-logo-container">
+        <div class="splash-orbit-ring"></div>
+        <img src="icons/logo.png" alt="FixMyCampus Logo" class="splash-logo-img">
+      </div>
+      <div class="splash-title">Fix<span class="accent">MyCampus</span></div>
+      <div class="splash-subtitle">REPORT • TRACK • RESOLVE</div>
+      <div class="splash-loader-bar">
+        <div class="splash-loader-progress"></div>
+      </div>
+      <div style="font-size: 11px; opacity: 0.65; margin-top: 6px;">Tap to skip</div>
+    </div>
+  </div>
+
+  <div class="phone-screen">
+    <!-- Ambient Floating Background Orbs -->
+    <div class="bg-glow-orb bg-glow-orb-1"></div>
+    <div class="bg-glow-orb bg-glow-orb-2"></div>
+
+    <div class="center-content">
+      <!-- Spanner Fixing Animated Logo Wrapper with New 3D Graphic Logo -->
+      <div class="spanner-hero-wrapper animate-pop-in" id="spannerHeroWrapper" title="FixMyCampus">
+
+        <!-- Dual Concentric Orbital Energy Rings -->
+        <div class="logo-orbit-ring logo-orbit-ring-1">
+          <div class="orbit-dot orbit-dot-1"></div>
+          <div class="orbit-dot orbit-dot-2"></div>
+        </div>
+        <div class="logo-orbit-ring logo-orbit-ring-2">
+          <div class="orbit-dot orbit-dot-1"></div>
+          <div class="orbit-dot orbit-dot-2"></div>
+        </div>
+
+        <!-- Metallic Light Sweep Overlay -->
+        <div class="logo-shine-sweep"></div>
+
+        <!-- Tap/Click Shockwave Expansion Ring -->
+        <div class="logo-shockwave" id="logoShockwave"></div>
+
+        <!-- Yellow Repair Spark Burst Elements -->
+        <div class="spanner-sparks-container">
+          <span class="spanner-spark spanner-spark-1">✨</span>
+          <span class="spanner-spark spanner-spark-2">⚡</span>
+          <span class="spanner-spark spanner-spark-3">💥</span>
+          <span class="spanner-spark spanner-spark-4">✨</span>
+        </div>
+
+        <!-- New Official 3D Graphic App Logo Image -->
+        <img src="icons/logo.png" alt="FixMyCampus Official Logo" class="spanner-fix-img" id="spannerFixImg">
+      </div>
+      
+      <h1 class="brand animate-fade-up delay-1" style="font-size: 30px;">Welcome to<br><span class="gradient-text-animated">Fix<span class="accent">MyCampus</span></span></h1>
+      
+      <div class="slogan-pill animate-fade-up delay-2" style="margin-top: 10px;">REPORT • TRACK • RESOLVE</div>
+      
+      <p class="subtitle mt-16 animate-fade-up delay-3" style="line-height: 1.6; max-width: 320px;">Report campus infrastructure, maintenance & cleanliness issues easily to help us build a better campus for everyone.</p>
+
+      <!-- Interactive Feature Badges Row -->
+      <div class="feature-badges-row animate-fade-up delay-3.5">
+        <div class="feature-badge-chip"><span class="badge-icon">⚡</span> Real-time Track</div>
+        <div class="feature-badge-chip"><span class="badge-icon">📸</span> Photo Proof</div>
+        <div class="feature-badge-chip"><span class="badge-icon">🛡️</span> Quick Resolve</div>
+      </div>
+
+      <!-- Animated Category Ticker -->
+      <div class="landing-ticker animate-fade-up delay-4" id="tickerBadge">
+        <span id="tickerIcon" class="ticker-icon-pop">💡</span> <span id="tickerText">Electrical Repairs & Lighting</span>
+      </div>
+
+      <div class="dots mt-24 animate-fade-up delay-5" id="carouselDots">
+        <span class="active"></span><span></span><span></span>
+      </div>
+
+      <div class="landing-login-actions mt-24 animate-fade-up delay-6" style="width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+        <a href="login.html" class="btn btn-primary btn-shimmer btn-cta-pulse" style="width: 100%;">🔑 Student Login <span class="btn-arrow">→</span></a>
+        <a href="register.html" class="btn btn-outline" style="width: 100%; margin-top: 2px;">✨ Create Student Account</a>
+        <button type="button" onclick="ApiConfig.openSettingsModal()" class="btn btn-outline" style="width: 100%; border-style: dashed; font-size: 13px; padding: 10px; margin-top: 2px; color: var(--navy); display: flex; align-items: center; justify-content: center; gap: 6px;">
+          ⚙️ Server & Network Settings
+        </button>
+        <p class="helper-text" style="margin-top: 6px;"><a href="admin-login.html" style="color: var(--navy); font-weight: 700; text-decoration: none;">Admin Login Portal →</a></p>
+      </div>
+
+      <!-- Open in App / PWA Install Banner -->
+      <div id="installBanner" class="action-card animate-fade-up delay-6" style="display:none; margin-top:20px; width:100%; border-color:var(--primary); background:var(--primary-light); padding:12px 14px;">
+        <img src="icons/icon-192.png" alt="FixMyCampus App Icon" style="width:46px; height:46px; border-radius:12px; object-fit:contain; background:#fff; padding:3px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        <div style="flex:1; text-align:left;">
+          <div class="title" style="color:var(--navy); font-size:14.5px;">Open in App</div>
+          <div class="desc" style="font-size:12px;">Install FixMyCampus on your home screen</div>
+        </div>
+        <button id="installBtn" class="btn btn-primary" style="width:auto; padding:8px 16px; font-size:13px; margin:0;">Install</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Web Audio API Synthesizer for Customized Wrench Fixing & Power Chime Sound
+    let audioCtx = null;
+
+    function playOpeningAudio() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+
+        // Harmonic Startup Chime Sweep: C4 (261.63Hz), G4 (392.00Hz), C5 (523.25Hz), E5 (659.25Hz), G5 (783.99Hz)
+        const freqs = [261.63, 392.00, 523.25, 659.25, 783.99];
+        freqs.forEach((f, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          const st = now + i * 0.07;
+          osc.frequency.setValueAtTime(f, st);
+          gain.gain.setValueAtTime(0, st);
+          gain.gain.linearRampToValueAtTime(0.2, st + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, st + 0.35);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(st);
+          osc.stop(st + 0.35);
+        });
+      } catch (e) {}
+    }
+
+    function playSpannerClinkSound() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+
+        // 1. Initial Metallic Wrench Strike (Sharp impact sound)
+        const oscStrike = audioCtx.createOscillator();
+        const gainStrike = audioCtx.createGain();
+        oscStrike.type = 'triangle';
+        oscStrike.frequency.setValueAtTime(1900, now);
+        oscStrike.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+        gainStrike.gain.setValueAtTime(0.25, now);
+        gainStrike.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        oscStrike.connect(gainStrike);
+        gainStrike.connect(audioCtx.destination);
+        oscStrike.start(now);
+        oscStrike.stop(now + 0.04);
+
+        // 2. Dual Tool Ratchet Click Sequence (+35ms and +75ms)
+        [0.035, 0.075].forEach((delay, idx) => {
+          const oscGear = audioCtx.createOscillator();
+          const gainGear = audioCtx.createGain();
+          oscGear.type = 'square';
+          oscGear.frequency.setValueAtTime(2400 - (idx * 500), now + delay);
+          oscGear.frequency.exponentialRampToValueAtTime(1200, now + delay + 0.03);
+          gainGear.gain.setValueAtTime(0.12, now + delay);
+          gainGear.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.03);
+          oscGear.connect(gainGear);
+          gainGear.connect(audioCtx.destination);
+          oscGear.start(now + delay);
+          oscGear.stop(now + delay + 0.03);
+        });
+
+        // 3. Customized Power-Up Resolution Chime Arpeggio (+90ms start)
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const oscChime = audioCtx.createOscillator();
+          const gainChime = audioCtx.createGain();
+          oscChime.type = 'sine';
+          const startTime = now + 0.09 + (idx * 0.05);
+          oscChime.frequency.setValueAtTime(freq, startTime);
+          gainChime.gain.setValueAtTime(0, startTime);
+          gainChime.gain.linearRampToValueAtTime(0.16, startTime + 0.02);
+          gainChime.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+          oscChime.connect(gainChime);
+          gainChime.connect(audioCtx.destination);
+          oscChime.start(startTime);
+          oscChime.stop(startTime + 0.22);
+        });
+
+      } catch (err) {
+        console.log('Audio playback notice:', err);
+      }
+    }
+
+    // Auto-Dismiss Opening Splash Screen with Audio & Animation
+    window.addEventListener('DOMContentLoaded', () => {
+      const splash = document.getElementById('appSplashScreen');
+      if (splash) {
+        setTimeout(() => { playOpeningAudio(); }, 150);
+
+        const dismissSplash = () => {
+          if (splash.classList.contains('fade-out')) return;
+          playOpeningAudio();
+          splash.classList.add('fade-out');
+          setTimeout(() => { splash.style.display = 'none'; }, 600);
+        };
+
+        setTimeout(dismissSplash, 1600);
+        splash.addEventListener('click', dismissSplash);
+      }
+    });
+
+    // Play synchronized chime sound on spanner ratchet turn intervals
+    setInterval(() => {
+      playSpannerClinkSound();
+    }, 4500);
+
+    // 3D Magnetic Logo Tilt & Shockwave Burst Interactive Handlers
+    const spannerWrapper = document.getElementById('spannerHeroWrapper');
+    const spannerImg = document.getElementById('spannerFixImg');
+    const logoShockwave = document.getElementById('logoShockwave');
+
+    if (spannerWrapper && spannerImg) {
+      spannerWrapper.addEventListener('mousemove', (e) => {
+        const rect = spannerWrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = (-y / (rect.height / 2)) * 16;
+        const rotateY = (x / (rect.width / 2)) * 16;
+        spannerImg.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.1)`;
+      });
+
+      spannerWrapper.addEventListener('mouseleave', () => {
+        spannerImg.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+      });
+
+      spannerWrapper.addEventListener('click', () => {
+        playSpannerClinkSound();
+        if (!logoShockwave) return;
+        logoShockwave.classList.remove('trigger');
+        void logoShockwave.offsetWidth; // Reflow
+        logoShockwave.classList.add('trigger');
+      });
+    }
+
+    // Category Ticker Animation & Synced Dots
+    const tickerItems = [
+      { icon: '💡', text: 'Electrical Repairs & Lighting' },
+      { icon: '🚰', text: 'Plumbing & Drainage' },
+      { icon: '⚙️', text: 'Steel Materials & Metal Works' },
+      { icon: '🌻', text: 'Gardens & Landscaping' },
+      { icon: '🌳', text: 'Trees & Grounds Maintenance' },
+      { icon: '📶', text: 'Internet & Wi-Fi Coverage' },
+      { icon: '🚽', text: 'Sanitation & Hygiene' }
+    ];
+    let tickerIdx = 0;
+    const tickerIconEl = document.getElementById('tickerIcon');
+    const tickerTextEl = document.getElementById('tickerText');
+    const tickerBadgeEl = document.getElementById('tickerBadge');
+    const dotsContainer = document.getElementById('carouselDots');
+    const dotSpans = dotsContainer ? dotsContainer.querySelectorAll('span') : [];
+
+    setInterval(() => {
+      tickerBadgeEl.style.opacity = '0';
+      tickerBadgeEl.style.transform = 'translateY(6px)';
+      setTimeout(() => {
+        tickerIdx = (tickerIdx + 1) % tickerItems.length;
+        tickerIconEl.textContent = tickerItems[tickerIdx].icon;
+        tickerTextEl.textContent = tickerItems[tickerIdx].text;
+        
+        // Re-trigger icon pop animation
+        tickerIconEl.classList.remove('ticker-icon-pop');
+        void tickerIconEl.offsetWidth; // trigger reflow
+        tickerIconEl.classList.add('ticker-icon-pop');
+
+        // Update active dot synchronously
+        if (dotSpans.length > 0) {
+          const activeDotIdx = tickerIdx % dotSpans.length;
+          dotSpans.forEach((dot, idx) => {
+            if (idx === activeDotIdx) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
+          });
+        }
+
+        tickerBadgeEl.style.opacity = '1';
+        tickerBadgeEl.style.transform = 'translateY(0)';
+      }, 300);
+    }, 2800);
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'flex';
+    });
+    document.getElementById('installBtn').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
+
+

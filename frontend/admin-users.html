@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>User Management - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="location.href='admin-dashboard.html'" title="Back to Dashboard">←</button>
+      <span>User Management</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus Logo" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div style="margin-bottom: 14px;">
+        <h2 style="font-family:'Outfit',sans-serif; color:var(--navy); font-size:22px; margin-bottom:4px;">Campus Accounts</h2>
+        <div class="slogan-pill" style="font-size:10px;">STUDENT & STAFF DIRECTORY</div>
+      </div>
+
+      <div id="alertBox"></div>
+
+      <!-- Search Box -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by name, email, department..." oninput="filterUsers()">
+      </div>
+
+      <!-- Role Filter Row -->
+      <div class="filter-row" id="roleFilterRow">
+        <div class="filter-chip active" data-role="">All Users (<span id="countAll">0</span>)</div>
+        <div class="filter-chip" data-role="student">🎓 Students (<span id="countStudents">0</span>)</div>
+        <div class="filter-chip" data-role="admin">🛡️ Admins (<span id="countAdmins">0</span>)</div>
+      </div>
+
+      <div id="userListContainer">
+        <script>document.write(renderSkeletons(4));</script>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="admin-dashboard.html"><span class="nav-icon">📊</span>Dashboard</a>
+      <a href="all-complaints.html"><span class="nav-icon">📋</span>Tickets</a>
+      <a href="admin-users.html" class="active"><span class="nav-icon">👥</span>Users</a>
+      <a href="admin-categories.html"><span class="nav-icon">🏷️</span>Categories</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAdmin();
+
+    let allUsersCache = [];
+    let selectedRole = '';
+
+    async function loadUsers() {
+      const container = document.getElementById('userListContainer');
+      container.innerHTML = renderSkeletons(4);
+      try {
+        allUsersCache = await Api.getUsers() || [];
+        updateCounts();
+        renderFilteredUsers();
+      } catch (err) {
+        container.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${err.message}</div>`;
+        Toast.error(err.message);
+      }
+    }
+
+    function updateCounts() {
+      document.getElementById('countAll').textContent = allUsersCache.length;
+      document.getElementById('countStudents').textContent = allUsersCache.filter(u => u.role === 'student').length;
+      document.getElementById('countAdmins').textContent = allUsersCache.filter(u => u.role === 'admin').length;
+    }
+
+    function renderFilteredUsers() {
+      const container = document.getElementById('userListContainer');
+      const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      const filtered = allUsersCache.filter(u => {
+        const matchesRole = !selectedRole || u.role === selectedRole;
+        const matchesSearch = !search ||
+          (u.full_name && u.full_name.toLowerCase().includes(search)) ||
+          (u.email && u.email.toLowerCase().includes(search)) ||
+          (u.department && u.department.toLowerCase().includes(search));
+        return matchesRole && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">No users found matching your filters.</div>`;
+        return;
+      }
+
+      const currentAdmin = Auth.getUser();
+
+      container.innerHTML = filtered.map(u => {
+        const isSelf = currentAdmin && currentAdmin.id === u.id;
+        return `
+          <div class="user-manage-card">
+            <div class="user-card-top">
+              <div class="user-card-avatar">
+                ${u.avatar_url ? `<img src="${u.avatar_url}" alt="${u.full_name}">` : (u.role === 'admin' ? '🛡️' : '👤')}
+              </div>
+              <div class="user-card-meta">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-weight:700; color:var(--navy); font-size:15px;">${u.full_name} ${isSelf ? '<span style="font-size:11px; color:var(--primary); font-weight:800;">(You)</span>' : ''}</div>
+                  <span class="user-role-pill ${u.role}">${u.role}</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">✉️ ${u.email}</div>
+                <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+                  🎓 ${u.department || 'General'} · 📅 ${u.year || 'N/A'} · 📋 ${u.complaint_count || 0} Tickets
+                </div>
+              </div>
+            </div>
+
+            ${!isSelf ? `
+              <div class="user-actions-row">
+                <button type="button" class="user-action-btn" onclick="toggleUserRole(${u.id}, '${u.role === 'admin' ? 'student' : 'admin'}')">
+                  ${u.role === 'admin' ? '⬇️ Demote to Student' : '⬆️ Promote to Admin'}
+                </button>
+                <button type="button" class="user-action-btn delete" onclick="confirmDeleteUser(${u.id}, '${u.full_name}')">
+                  🗑️ Delete
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterUsers() {
+      renderFilteredUsers();
+    }
+
+    document.getElementById('roleFilterRow').addEventListener('click', (e) => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#roleFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedRole = chip.dataset.role;
+      renderFilteredUsers();
+    });
+
+    async function toggleUserRole(userId, newRole) {
+      if (!confirm(`Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`)) return;
+      try {
+        await Api.updateUserRole(userId, newRole);
+        Toast.success(`User role updated to ${newRole}!`);
+        loadUsers();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    }
+
+    async function confirmDeleteUser(userId, userName) {
+      if (!confirm(`Are you sure you want to delete user "${userName}"? All their submitted complaints will also be deleted.`)) return;
+      try {
+        await Api.deleteUser(userId);
+        Toast.success('User account deleted.');
+        loadUsers();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

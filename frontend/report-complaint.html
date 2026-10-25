@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Issue - FixMyCampus</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B192C">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FixMyCampus">
+</head>
+<body>
+  <div class="phone-screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="history.back()" title="Go Back">←</button>
+      <span>Report Issue</span>
+      <div class="spacer"></div>
+      <img src="icons/logo.png" alt="FixMyCampus" class="topbar-logo">
+    </div>
+
+    <div class="content">
+      <div id="alertBox"></div>
+
+      <form id="complaintForm" novalidate>
+        <!-- Hidden Inputs for Auto-Generated Title & Selected Category -->
+        <input type="hidden" id="title" name="title" value="">
+        <input type="hidden" id="category" name="category" value="">
+
+        <!-- Auto-Title Indicator Badge -->
+        <div class="auto-title-badge" id="autoTitleBadge">
+          <span>📌</span>
+          <span id="autoTitleText">Tap a category below to report an issue</span>
+        </div>
+
+        <!-- Visual Animated Category Grid Cards -->
+        <div class="form-group">
+          <label>Select Category <span style="color:var(--primary); font-weight:700;">(Tap to select)</span></label>
+          <div class="category-grid-cards" id="categoryGrid">
+            <div class="category-card-item" data-category="Plumbing">
+              <div class="category-card-icon">🚰</div>
+              <div class="category-card-name">Plumbing & Water</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Electrical">
+              <div class="category-card-icon">💡</div>
+              <div class="category-card-name">Electrical & Lights</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Sanitation & Hygiene">
+              <div class="category-card-icon">🧹</div>
+              <div class="category-card-name">Sanitation & Hygiene</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Internet & Wi-Fi">
+              <div class="category-card-icon">📶</div>
+              <div class="category-card-name">Internet & Wi-Fi</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Steel Materials & Metal">
+              <div class="category-card-icon">⚙️</div>
+              <div class="category-card-name">Metal & Locks</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Furniture / Civil">
+              <div class="category-card-icon">🪑</div>
+              <div class="category-card-name">Furniture & Civil</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Gardens & Landscaping">
+              <div class="category-card-icon">🌳</div>
+              <div class="category-card-name">Gardens & Grounds</div>
+              <div class="category-card-check">✓</div>
+            </div>
+            <div class="category-card-item" data-category="Security / Other">
+              <div class="category-card-icon">🛡️</div>
+              <div class="category-card-name">Security & Other</div>
+              <div class="category-card-check">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-Tap Quick Issue Chips Container -->
+        <div class="quick-chips-wrapper" id="quickChipsWrapper" style="display:none;">
+          <div class="quick-chips-title">⚡ 1-Tap Quick Issue Options:</div>
+          <div class="quick-issue-chips" id="quickChips"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location / Room Number</label>
+          <div class="input-wrap">
+            <span class="icon">📍</span>
+            <input type="text" id="location" placeholder="e.g. Block A, Room 302, Library Wing" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Issue Description</label>
+          <div class="input-wrap">
+            <textarea id="description" required placeholder="Describe the problem or tap a quick issue button above..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Attach Photo Proof <span style="font-weight:400; color:var(--text-muted);">(Recommended)</span></label>
+          <div class="upload-box" id="uploadBox" onclick="document.getElementById('photoInput').click()">
+            <div id="uploadPlaceholder">
+              <div class="camera-icon">📷</div>
+              <div style="font-weight:700; color:var(--navy); font-size:14px;">Tap to upload photo proof</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Supports JPG, PNG (Max 5MB)</div>
+            </div>
+            <img id="previewImg" class="preview" style="display:none;" alt="Photo Preview">
+          </div>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="margin-top: 10px;">Submit Complaint Ticket</button>
+      </form>
+    </div>
+
+    <div class="bottom-nav">
+      <a href="student-home.html"><span class="nav-icon">🏠</span>Home</a>
+      <a href="report-complaint.html" class="fab" style="text-decoration:none;" title="Report Issue">➕</a>
+      <a href="profile.html"><span class="nav-icon">👤</span>Profile</a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/validation.js"></script>
+  <script>
+    Auth.requireStudent();
+
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    function showNotification(message) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("FixMyCampus", {
+          body: message,
+          icon: "icons/logo.png"
+        });
+      }
+    }
+
+    let compressedPhotoFile = null;
+    const photoInput = document.getElementById('photoInput');
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+
+      Toast.info('Optimizing photo for fast mobile upload...');
+      try {
+        compressedPhotoFile = await ImageCompressor.compress(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('previewImg').src = e.target.result;
+          document.getElementById('previewImg').style.display = 'block';
+          document.getElementById('uploadPlaceholder').style.display = 'none';
+          const origMb = (file.size / (1024 * 1024)).toFixed(1);
+          const compKb = (compressedPhotoFile.size / 1024).toFixed(0);
+          Toast.success(`Photo proof ready! (${origMb}MB ➔ ${compKb}KB) 📷`);
+        };
+        reader.readAsDataURL(compressedPhotoFile);
+      } catch (err) {
+        compressedPhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('previewImg').src = e.target.result;
+          document.getElementById('previewImg').style.display = 'block';
+          document.getElementById('uploadPlaceholder').style.display = 'none';
+          Toast.info('Photo proof attached successfully 📷');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    const titleEl = document.getElementById('title');
+    const categoryEl = document.getElementById('category');
+    const locationEl = document.getElementById('location');
+    const descEl = document.getElementById('description');
+    const autoTitleBadge = document.getElementById('autoTitleBadge');
+    const autoTitleText = document.getElementById('autoTitleText');
+    const quickChipsWrapper = document.getElementById('quickChipsWrapper');
+    const quickChipsContainer = document.getElementById('quickChips');
+
+    // Category Quick Chips Mapping
+    const quickIssuesData = {
+      'Plumbing': [
+        { label: '💧 Pipe Leakage', desc: 'Pipe is leaking water heavily in washroom/corridor.' },
+        { label: '🚿 No Water Supply', desc: 'No water supply available in the taps/washroom.' },
+        { label: '🚽 Toilet Flush Broken', desc: 'Toilet flush mechanism is damaged or blocked.' },
+        { label: '🚰 Tap Dripping', desc: 'Water tap is dripping continuously and will not shut off.' }
+      ],
+      'Electrical': [
+        { label: '💡 Light Bulb Out', desc: 'Light bulb/fixture is broken or flickering.' },
+        { label: '🔌 Socket Sparking', desc: 'Power outlet socket is loose or sparking.' },
+        { label: '🌀 Fan Not Working', desc: 'Ceiling fan is stuck, not spinning or making loud noise.' },
+        { label: '⚡ Switch Broken', desc: 'Light/fan switch is damaged or unresponsive.' }
+      ],
+      'Sanitation & Hygiene': [
+        { label: '🗑️ Dustbin Overflowing', desc: 'Trash dustbin is completely full and overflowing.' },
+        { label: '🧼 Washroom Cleaning Needed', desc: 'Washroom requires urgent cleaning and sanitization.' },
+        { label: '🧹 Floor Spill Cleaning', desc: 'Floor spill/dirt requiring mop cleanup.' }
+      ],
+      'Internet & Wi-Fi': [
+        { label: '📶 Wi-Fi Signal Dropping', desc: 'Wi-Fi connection is weak and dropping continuously.' },
+        { label: '🌐 No Internet Port', desc: 'LAN port / Wi-Fi network has no active internet connection.' }
+      ],
+      'Steel Materials & Metal': [
+        { label: '🚪 Door Latch Broken', desc: 'Metal door lock or latch is broken or jammed.' },
+        { label: '🪟 Window Grill Damaged', desc: 'Metal window frame or safety grill is damaged.' },
+        { label: '🪜 Stair Railing Loose', desc: 'Staircase metal handrail is loose or detached.' }
+      ],
+      'Furniture / Civil': [
+        { label: '🪑 Desk / Chair Broken', desc: 'Classroom bench, desk, or chair is broken.' },
+        { label: '🧱 Wall Paint Peeling', desc: 'Wall plaster or ceiling paint peeling off.' }
+      ],
+      'Gardens & Landscaping': [
+        { label: '🌿 Overgrown Bushes', desc: 'Hedges/grass along walking path need trimming.' },
+        { label: '🌳 Broken Tree Branch', desc: 'Fallen tree branch blocking walkway.' }
+      ],
+      'Security / Other': [
+        { label: '🔐 Gate Security Issue', desc: 'Door lock or gate security concern.' },
+        { label: '📢 General Maintenance', desc: 'General facility repair assistance required.' }
+      ]
+    };
+
+    // Category Card Click Handler
+    const categoryCards = document.querySelectorAll('.category-card-item');
+    categoryCards.forEach(card => {
+      card.addEventListener('click', () => {
+        categoryCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+
+        const catName = card.dataset.category;
+        categoryEl.value = catName;
+        
+        // Auto-generate title automatically
+        const generatedTitle = `${catName} Maintenance Issue`;
+        titleEl.value = generatedTitle;
+        autoTitleText.textContent = `Auto-Title: ${generatedTitle}`;
+        autoTitleBadge.style.background = 'var(--primary-light)';
+        autoTitleBadge.style.borderColor = 'var(--primary)';
+
+        Validation.showFieldSuccess(categoryEl);
+
+        // Render Quick Issue Chips
+        renderQuickChips(catName);
+        Toast.info(`Selected ${catName} — Auto Title generated ✨`);
+      });
+    });
+
+    function renderQuickChips(catName) {
+      const chips = quickIssuesData[catName] || quickIssuesData['Security / Other'];
+      quickChipsContainer.innerHTML = '';
+      quickChipsWrapper.style.display = 'block';
+
+      chips.forEach(chip => {
+        const chipBtn = document.createElement('button');
+        chipBtn.type = 'button';
+        chipBtn.className = 'quick-chip-btn';
+        chipBtn.innerHTML = chip.label;
+        chipBtn.addEventListener('click', () => {
+          document.querySelectorAll('.quick-chip-btn').forEach(b => b.classList.remove('active'));
+          chipBtn.classList.add('active');
+
+          // Auto fill title & description
+          const specificTitle = `${catName} - ${chip.label.replace(/^[^\s]+\s*/, '')}`;
+          titleEl.value = specificTitle;
+          autoTitleText.textContent = `Auto-Title: ${specificTitle}`;
+
+          descEl.value = chip.desc;
+          Validation.showFieldSuccess(descEl);
+          Toast.success(`Applied quick issue: ${chip.label}`);
+        });
+        quickChipsContainer.appendChild(chipBtn);
+      });
+    }
+
+    locationEl.addEventListener('blur', () => {
+      if (locationEl.value.trim().length >= 3) Validation.showFieldSuccess(locationEl);
+    });
+
+    descEl.addEventListener('blur', () => {
+      if (descEl.value.trim().length >= 5) Validation.showFieldSuccess(descEl);
+    });
+
+    document.getElementById('complaintForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      const btn = document.getElementById('submitBtn');
+      alertBox.innerHTML = '';
+
+      // Fallback if category was selected but title empty
+      if (!categoryEl.value) {
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> Please select a category card above.</div>`;
+        Toast.warning('Please tap a category card above.');
+        return;
+      }
+
+      if (!titleEl.value) {
+        titleEl.value = `${categoryEl.value} Maintenance Report`;
+      }
+
+      const data = {
+        title: titleEl.value.trim(),
+        category: categoryEl.value,
+        location: locationEl.value.trim(),
+        description: descEl.value.trim()
+      };
+
+      if (!Validation.validateComplaintForm(data)) {
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> Please fill in location & issue details properly.</div>`;
+        Toast.warning('Please fill in location & issue details properly.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px; display: inline-block;"></span> Submitting Complaint...`;
+
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('category', data.category);
+      formData.append('description', data.description);
+      formData.append('location', data.location);
+      if (compressedPhotoFile) {
+        formData.append('photo', compressedPhotoFile);
+      } else if (photoInput.files[0]) {
+        formData.append('photo', photoInput.files[0]);
+      }
+
+      try {
+        await Api.createComplaint(formData);
+        DraftManager.clear();
+        alertBox.innerHTML = `<div class="alert success"><span class="err-icon">✅</span> Complaint submitted successfully! Tracking ticket generated.</div>`;
+        Toast.success('Complaint submitted successfully! Tracking ticket generated.');
+        showNotification("Complaint ticket generated successfully ✅");
+
+        setTimeout(() => {
+          window.location.href = "my-complaints.html";
+        }, 800);
+      } catch (err) {
+        const msg = err.message || 'Failed to submit complaint.';
+        alertBox.innerHTML = `<div class="alert error"><span class="err-icon">⚠️</span> ${msg}</div>`;
+        Toast.error(msg);
+        btn.disabled = false;
+        btn.textContent = "Submit Complaint Ticket";
+      }
+    });
+
+    // Auto-save draft as student types
+    function persistCurrentDraft() {
+      DraftManager.save({
+        category: categoryEl.value,
+        title: titleEl.value,
+        location: locationEl.value,
+        description: descEl.value
+      });
+    }
+    locationEl.addEventListener('input', persistCurrentDraft);
+    descEl.addEventListener('input', persistCurrentDraft);
+
+    // Restore draft if available
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedDraft = DraftManager.load();
+      if (savedDraft) {
+        if (savedDraft.category) {
+          categoryEl.value = savedDraft.category;
+          const targetCard = document.querySelector(`.category-card-item[data-category="${savedDraft.category}"]`);
+          if (targetCard) {
+            categoryCards.forEach(c => c.classList.remove('active'));
+            targetCard.classList.add('active');
+            renderQuickChips(savedDraft.category);
+          }
+        }
+        if (savedDraft.location) locationEl.value = savedDraft.location;
+        if (savedDraft.description) descEl.value = savedDraft.description;
+        if (savedDraft.title) {
+          titleEl.value = savedDraft.title;
+          autoTitleText.textContent = `Auto-Title: ${savedDraft.title}`;
+          autoTitleBadge.style.background = 'var(--primary-light)';
+          autoTitleBadge.style.borderColor = 'var(--primary)';
+        }
+        if (savedDraft.location || savedDraft.description) {
+          Toast.info('Draft restored from previous session 📝');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

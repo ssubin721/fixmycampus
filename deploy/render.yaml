@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: fixmycampus-api
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FORCE_SQLITE
+        value: "true"
+      # If using managed MySQL:
+      # - key: DB_HOST
+      #   fromDatabase:
+      #     name: fixmycampus-db
+      #     property: host
+      # - key: DB_USER
+      #   fromDatabase:
+      #     name: fixmycampus-db
+      #     property: user
+      # - key: DB_PASSWORD
+      #   fromDatabase:
+      #     name: fixmycampus-db
+      #     property: password
+      # - key: DB_NAME
+      #   fromDatabase:
+      #     name: fixmycampus-db
+      #     property: database
