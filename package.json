@@ -4,6 +4,8 @@
   "description": "A full-stack campus complaint reporting application — students report issues (broken fans, water leakage, etc.), and campus admins triage, assign staff, and track resolution. Built to match the 13-screen UI design: Splash, Welcome, Login, Register, Student Home, Report Complaint, My Complaints, Complaint Details, Profile, Admin Login, Admin Dashboard, All Complaints, and Complaint Management.",
   "main": "index.js",
   "scripts": {
+    "build": "cd backend && npm install",
+    "start": "cd backend && node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
